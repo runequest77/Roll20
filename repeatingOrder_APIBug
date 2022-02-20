@@ -1,0 +1,22 @@
+//Roll20の検証用スクリプト
+//
+//ブラウザから入力した時とAPIかｒから入力した時で、repeating attributeの並び順が変わる。
+//APIから呼んだ時は_reporder_repeating_隠しattributeによる並べ替えが効いてない。
+//おそらく作られた順序=nameに含まれるkeyの順に戻って来る
+//
+//バグ報告をする。
+//
+on('chat:message', function(msg) {
+    //!rq77_1 @{selected|character_name}
+    if(msg.type != 'api' || msg.content.indexOf('!rq77_2 ')) return;
+    let content = msg.content.replace("!rq77_2 ", "");
+
+    // !rq77_2 character_name,attribute_name,@{character_name|attribute_name}
+    const param = content.split(',');
+    const character_name = param[0].trim();
+    const attribute_name = param[1].trim();
+    const ui_result = param[2].trim();
+    
+    command = `@{${character_name}|${attribute_name}}`
+    sendChat("rq77_2_result1","API:" + command + "<br />UI:" + ui_result);
+})
