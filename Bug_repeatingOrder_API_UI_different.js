@@ -1,6 +1,6 @@
 //Roll20の検証用スクリプト
 //
-//ブラウザから入力した時とAPIかｒから入力した時で、repeating attributeの並び順が変わる。
+//ブラウザから入力した時とAPIから入力した時で、repeating attributeの並び順が変わる。
 //_reporder_repeating_隠しattributeによる並べ替えがないとき、UIからは大文字小文字の区別あり、APIからは大文字小文字の区別なしで順序が判定されている。
 //バグ報告をした。
 //https://app.roll20.net/forum/post/10704926/repeating-order-is-different-between-ui-and-api
