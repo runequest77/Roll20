@@ -57,6 +57,8 @@ function getSortedRepeatingAttributes(character_id,repeating_section) {
     let attr = {}
     attributes.forEach(a => {
         let name = a.get("name");
+        //★ポイント！　チャット上からは番号指定できるけど実際の記録は個別のattributeをsectionにつけた固有IDで束ねている形式。
+        //個々のattributeからは番号はわからない。
         //repeating_melee_-Mq1qrga1bggG8OFeyMN_weapon_type
         let match = name.match(/^repeating_[\w]{1,}_([-\w]{20})_([_-\w]*$)/);
         log("JSON.stringify(match):" + JSON.stringify(match));
@@ -65,12 +67,13 @@ function getSortedRepeatingAttributes(character_id,repeating_section) {
     })
     log("JSON.stringify(attr):" + JSON.stringify(attr));
     
-    //並び順を変更した場合に作られるattribute。存在したら、その順序に取りに行く。
+    //★ポイント！　並び順を変更した場合に作られるattribute。存在したら、その順序に取りに行く。
     let order = [];
     const reporder = findObjs({ type: 'attribute', _characterid: character_id, name:`_reporder_repeating_` + repeating_section});
     if (reporder.length == 1) {
         order = reporder.split("|");
     } else {
+        //並び変えていない場合はsectionのid順だろうという推測。idの取得形式については別の記事で解説。
         order = Object.keys(attr).sort();
     }
     let result = [];
