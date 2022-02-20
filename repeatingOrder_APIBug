@@ -4,10 +4,11 @@
 //APIから呼んだ時は_reporder_repeating_隠しattributeによる並べ替えが効いてない。
 //おそらく作られた順序=nameに含まれるkeyの順に戻って来る
 //
-//バグ報告をする。
+//バグ報告をした。
+//https://app.roll20.net/forum/post/10704926/repeating-order-is-different-between-ui-and-api
 //
 on('chat:message', function(msg) {
-    //!rq77_1 @{selected|character_name}
+    //!rq77_2 @{selected|character_name}
     if(msg.type != 'api' || msg.content.indexOf('!rq77_2 ')) return;
     let content = msg.content.replace("!rq77_2 ", "");
 
