@@ -51,6 +51,7 @@ on('chat:message', function(msg) {
     sendChat("rq77_1",result);
 })
 
+//繰り返しアトリビュートをキャラクターシートの並び順の配列として返す
 function getSortedRepeatingAttributes(character_id,repeating_section) {
     'use strict';
     log("character_id:" + character_id);
@@ -59,30 +60,57 @@ function getSortedRepeatingAttributes(character_id,repeating_section) {
         return (a.get("name").indexOf(`repeating_${repeating_section}_`) == 0);
     });
 
+    //attributeのグループIDを連想配列のkeyとして、行ごとに列を集約
     let attr = {}
     attributes.forEach(a => {
         let name = a.get("name");
-        //★ポイント！　チャット上からは番号指定できるけど実際の記録は個別のattributeをsectionにつけた固有IDで束ねている形式。
-        //個々のattributeからは番号はわからない。
         //repeating_melee_-Mq1qrga1bggG8OFeyMN_weapon_type
         let match = name.match(/^repeating_[\w]{1,}_([-\w]{20})_([_-\w]*$)/);
-        log("JSON.stringify(match):" + JSON.stringify(match));
-        if (match[1] in attr === false)  attr[match[1]] = {};
+        if (match[1] in attr === false) {
+            attr[match[1]] = { "_key": match[1] };
+        }
         attr[match[1]][match[2]] = a.get("current");
     })
-    log("JSON.stringify(attr):" + JSON.stringify(attr));
     
-    //★ポイント！　並び順を変更した場合に作られるattribute。存在したら、その順序に取りに行く。
-    let order = [];
-    const reporder = findObjs({ type: 'attribute', _characterid: character_id, name:`_reporder_repeating_` + repeating_section});
-    if (reporder.length == 1) {
-        order = reporder.split("|");
-    } else {
-        //並び変えていない場合はsectionのid順だろうという推測。idの取得形式については別の記事で解説。
-        order = Object.keys(attr).sort();
+    let apiorder = Object.keys(attr);
+    //UIとAPIで並び順が変わるバグに暫定対応
+    //APIは大文字小文字を区別せずに並べ替え
+    apiorder.sort( (a,b) => {
+        return  (a.toString().toLowerCase() > b.toString().toLowerCase()) ?  1 : -1;
+    });
+    log("API ORDER:" + apiorder);
+    for (let i = 0; i < apiorder.length; i++) {
+        let a = attr[apiorder[i]];
+        a['_apiorder'] = i;
     }
+
+    //UIは大文字小文字を区別して並べ替え(大文字が前に来るのでアルファベット順にならない)。
+    let sensitiveorder = Object.keys(attr);
+    sensitiveorder.sort;
+    for (let i = 0; i < sensitiveorder.length; i++) {
+        let a = attr[sensitiveorder[i]];
+        a['_sensitiveorder'] = i;
+    }
+    log("sensitive ORDER:" + sensitiveorder);
+    
+    //並び順を変更した場合に作られるattribute。存在したら、その順序に取りに行く。
     let result = [];
-    result = order.map( id => attr[id]);
-    log("JSON.stringify(result):" + JSON.stringify(result));
+    const attr_reporder = getAttrByName( character_id, `_reporder_repeating_` + repeating_section );
+
+    let uiorder = sensitiveorder;
+    if (attr_reporder) {
+        let reporder = attr_reporder.split("|");
+        let short = sensitiveorder.filter(i => reporder.indexOf(i) == -1)
+        uiorder = reporder.concat(short);
+    } else {
+        log("_reporder_repeating_:not exists");
+    }
+    log("UI ORDER:" + uiorder);
+    for (let i = 0; i < uiorder.length; i++) {
+        let a = attr[uiorder[i]];
+        a['_uiorder'] = i;
+        result.push(a);
+    }
+
     return result;
 }
